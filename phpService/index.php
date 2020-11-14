@@ -20,7 +20,7 @@ use GuzzleHttp\Client;
 use OpenTracing\Formats;
 use OpenTracing\Reference;
 
-print_r($_SERVER);
+var_dump($_SERVER,  $_REQUEST);
 
 
 //init server span start
@@ -32,10 +32,10 @@ $config::$propagator = Jaeger\Constants\PROPAGATOR_ZIPKIN;
 $tracer = $config->initTracer('phpService', 'jaeger:6831');
 
 $injectTarget = [];
-$spanContext = $tracer->extract(Formats\TEXT_MAP, $_SERVER);
-$serverSpan = $tracer->startSpan('example HTTP', ['child_of' => $spanContext]);
+$spanContext = $tracer->extract(Formats\TEXT_MAP, $_SERVER, 'HTTP_X_TRACEID');
+$serverSpan = $tracer->startSpan('example HTTP');
 $serverSpan->addBaggageItem("version", "1.8.9");
-print_r($serverSpan->getContext());
+var_dump($serverSpan->getContext());
 $tracer->inject($serverSpan->getContext(), Formats\TEXT_MAP, $_SERVER);
 
 //init server span end
@@ -46,12 +46,12 @@ $injectTarget1 = [];
 $spanContext = $clientTracer->extract(Formats\TEXT_MAP, $_SERVER);
 $clientSpan1 = $clientTracer->startSpan('HTTP1', ['child_of' => $spanContext]);
 $clientTracer->inject($clientSpan1->spanContext, Formats\TEXT_MAP, $injectTarget1);
+var_dump($injectTarget1);
 
 $method = 'GET';
 $url = 'https://github.com/';
 $client = new Client();
 $res = $client->request($method, $url,['headers' => $injectTarget1]);
-
 $clientSpan1->setTag('http.status_code', 200);
 $clientSpan1->setTag('http.method', 'GET');
 $clientSpan1->setTag('http.url', $url);
@@ -70,6 +70,8 @@ $clientSpan2 = $clientTracer->startSpan('HTTP2',
     ]]);
 
 $clientTracer->inject($clientSpan2->spanContext, Formats\TEXT_MAP, $injectTarget2);
+
+var_dump($injectTarget2);
 
 $method = 'GET';
 $url = 'https://github.com/search?q=jaeger-php';
