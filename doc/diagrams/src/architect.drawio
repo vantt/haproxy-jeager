@@ -1,0 +1,65 @@
+<mxfile host="" modified="2020-11-14T02:31:26.989Z" agent="5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.44.2 Chrome/78.0.3904.130 Electron/7.1.11 Safari/537.36" etag="26MjoQ8ADq9RUQl5dDZk" version="13.1.3">
+    <diagram id="d01J-ukoAFh2b3ArlTiC" name="Page-1">
+        <mxGraphModel dx="814" dy="305" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="5" value="" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="20" width="580" height="390" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#005700;fontColor=#ffffff;fillColor=none;dashed=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="190" y="50" width="400" height="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="75" width="180" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF6666;strokeWidth=1;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="75" width="100" height="275" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" style="edgeStyle=none;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;strokeWidth=1;fillColor=#d80073;strokeColor=#FF6666;" parent="1" source="4" target="18" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&lt;img src=&quot;https://avatars2.githubusercontent.com/u/15482765?s=200&amp;amp;v=4&quot; width=&quot;200&quot; height=&quot;200&quot;&gt;" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=https://avatars2.githubusercontent.com/u/15482765?s=200&amp;v=4;" parent="1" vertex="1">
+                    <mxGeometry x="245" y="269" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" target="4">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="270" y="150" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="16">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="245" y="125" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="16" value="" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.user;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="110" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="jeager agent" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=https://www.instana.com/media/01_INSTANA_IconSet_jaeger.svg;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="90" width="50" height="56" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="250" width="180" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.98;entryY=0.38;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="29" target="18">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="serviceB" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=https://techalignment.com/wp-content/uploads/2018/12/kubernetes-icon-color-sm-e1545244190428.png;" parent="1" vertex="1">
+                    <mxGeometry x="510" y="265" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="45" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="30" target="18">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="serviceA" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=https://techalignment.com/wp-content/uploads/2018/12/kubernetes-icon-color-sm-e1545244190428.png;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="265" width="50" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="" style="aspect=fixed;html=1;points=[];align=center;image;fontSize=12;image=https://www.docker.com/sites/default/files/d8/styles/role_icon/public/2019-07/Moby-logo.png?itok=sYH_JEaJ;dashed=1;labelBackgroundColor=#006633;strokeColor=#FF6666;strokeWidth=2;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="30" width="57" height="41" as="geometry"/>
+                </mxCell>
+                <mxCell id="49" value="ha proxy" style="pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#4495D1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.veeam.2d.proxy;" vertex="1" parent="1">
+                    <mxGeometry x="240" y="95" width="52.4" height="52.4" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

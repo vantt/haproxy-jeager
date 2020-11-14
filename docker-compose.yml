@@ -7,9 +7,11 @@ networks:
 
 services:
     haproxy: # a1 load balanced
-        image: spoa-jeager
+        image: hajeager
         networks:
             front-proxy: {}
+        ports: 
+          -  10080:10080    
         volumes:
           - ./etc/haproxy:/usr/local/etc/haproxy
 
@@ -18,9 +20,11 @@ services:
         image: containous/whoami:v1.5.0
         environment:
           WHOAMI_NAME: whoami_a
+        ports: 
+            - 8000:8000  
         networks:
             front-proxy: {}
-        command: --port 12345    
+        command: --port 8000    
 
 
     #########################################################
@@ -48,8 +52,9 @@ services:
         image: jaegertracing/all-in-one:1.7.0
         networks:
             front-proxy:  {}
-        # ports:
-        #     - 16686:16686 # The UI port, traefik will do routing
+        ports:
+            - 16686:16686 # The UI port, traefik will do routing
+            - 6831:6831
         labels:
             # https://docs.traefik.io/reference/dynamic-configuration/docker/
             # https://docs.traefik.io/routing/providers/docker/
