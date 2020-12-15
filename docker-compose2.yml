@@ -1,0 +1,115 @@
+version: '3.7'
+
+networks:
+    front-proxy:
+        external: true
+        name: https-proxy
+
+services:
+    reverse-proxy:
+        image: traefik:v2.3.1   # The official v2 Traefik docker image
+        restart: always
+
+        ports:
+        - 80:80     # The HTTP port
+        - 443:443   
+        #- "8080:8080" # The Web UI (enabled by --api.insecure=true)
+        
+        volumes:
+        # So that Traefik can listen to the Docker events
+        - /var/run/docker.sock:/var/run/docker.sock
+        - ./etc/traefik/:/etc/traefik/
+
+        networks:
+            front-proxy:  {}
+
+    
+    phpService:
+        image: devops/phpcli:7.2
+        environment:
+          JEAGER_AGENT: jaeger:9411
+          JAEGER_AGENT_HOST: jaeger
+          JAEGER_AGENT_PORT: 9411 #6831
+        ports: 
+            - 8080:8080
+        volumes: 
+            - ./phpService:/app    
+        networks:
+            front-proxy: {}
+        command: php -S 0.0.0.0:8080 /app/index.php      
+        labels: 
+            # https://docs.traefik.io/reference/dynamic-configuration/docker/
+            # https://docs.traefik.io/routing/providers/docker/
+            - traefik.enable=true # expose this container through traefik
+            - traefik.http.services.demoProduct.loadbalancer.server.port=8080
+
+            # http route, redirect to https
+            # - traefik.http.routers.demoProduct_http.entrypoints=http
+            # - traefik.http.routers.demoProduct_http.rule=Host(`demo.dev.mz`)
+            # - traefik.http.routers.demoProduct_http.middlewares=force-https@file
+
+            # https route
+            - traefik.http.routers.demoProduct_https.entrypoints=https
+            - traefik.http.routers.demoProduct_https.rule=Host(`demo.dev.mz`)
+            - traefik.http.routers.demoProduct_https.tls=true
+            - traefik.http.routers.demoProduct_https.service=demoProduct
+    
+   
+    
+   
+    #########################################################
+    # Jaeger AGENT Ports 
+    #
+    # 16686 HTTP  The UI port
+    #
+    # 6831	UDP	  accept jaeger.thrift in compact Thrift protocol used by most current Jaeger clients
+    # 6832	UDP	  accept jaeger.thrift in binary Thrift protocol used by Node.js Jaeger client (because thriftrw npm package does not support compact protocol)
+    # 5778	HTTP	serve configs, sampling strategies
+    # 5775	UDP	  accept zipkin.thrift in compact Thrift protocol (deprecated; only used by very old Jaeger clients, circa 2016)
+    # 14271	HTTP	Healthcheck at / and metrics at /metrics
+    #
+    #
+    # Jaeger COLLECTOR Ports
+    #
+    # 14267	TChannel  used by jaeger-agent to send spans in jaeger.thrift format
+    # 14250	gRPC	    used by jaeger-agent to send spans in model.proto format
+    # 14268	HTTP	    can accept spans directly from clients in jaeger.thrift format over binary thrift protocol
+    # 9411	HTTP	    can accept Zipkin spans in Thrift, JSON and Proto (disabled by default)
+    # 14269	HTTP	    Healthcheck at / and metrics at /metrics
+    #
+    ####################################################################
+    jaeger:
+        image: jaegertracing/all-in-one:1.7.0
+        networks:
+            front-proxy:  {}
+        ports:
+            - 16686:16686 # The UI port, traefik will do routing
+            - 6831:6831/tcp
+            - 6832:6832/tcp
+            - 6831:6831/udp
+            - 6832:6832/udp
+            - 9411:9411
+        environment: 
+            - COLLECTOR_ZIPKIN_HTTP_PORT=9411  
+        labels:
+            # https://docs.traefik.io/reference/dynamic-configuration/docker/
+            # https://docs.traefik.io/routing/providers/docker/
+
+            - traefik.enable=true # expose this container through traefik
+            - traefik.http.services.jaeger.loadbalancer.server.port=16686
+
+            #  http route redirect
+            #- traefik.http.routers.jaeger.entrypoints=http
+            #- traefik.http.routers.jaeger.rule=Host(`jaeger.dev.mz`)
+            #- traefik.http.routers.jaeger.middlewares=force-https@file
+
+            # http server
+            #- traefik.http.routers.jaeger.service=jaeger
+            #- traefik.http.routers.jaeger.tls=false
+            #- traefik.http.routers.jaeger.tls.certresolver=false
+
+            # https route
+            - traefik.http.routers.jaeger_https.entrypoints=https
+            - traefik.http.routers.jaeger_https.rule=Host(`jaeger.dev.mz`)
+            - traefik.http.routers.jaeger_https.tls=true
+            - traefik.http.routers.jaeger_https.service=jaeger

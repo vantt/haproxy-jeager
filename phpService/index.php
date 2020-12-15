@@ -1,94 +1,69 @@
 <?php
-/*
- * Copyright (c) 2019, The Jaeger Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
- */
+require 'vendor/autoload.php';
 
-require_once 'vendor/autoload.php';
+use Jaeger\SpanContext as JaegerSpanContext;
+use OpenTelemetry\Contrib\Jaeger\Exporter as JaegerExporter;
+use OpenTelemetry\Sdk\Trace\Attributes;
+use OpenTelemetry\Sdk\Trace\Clock;
+use OpenTelemetry\Sdk\Trace\Sampler\AlwaysOnSampler;
+use OpenTelemetry\Sdk\Trace\SamplingResult;
+use OpenTelemetry\Sdk\Trace\SpanContext;
+use OpenTelemetry\Sdk\Trace\SpanProcessor\BatchSpanProcessor;
+use OpenTelemetry\Sdk\Trace\TracerProvider;
+use OpenTelemetry\Trace as API;
 
-use Jaeger\Config;
-use GuzzleHttp\Client;
-use OpenTracing\Formats;
-use OpenTracing\Reference;
+var_dump($_SERVER);
 
-var_dump($_SERVER,  $_REQUEST);
+$sampler = new AlwaysOnSampler();
+$samplingResult = $sampler->shouldSample(
+    null,
+    $_SERVER['HTTP_UBER_TRACE_ID'],
+    substr(md5((string) microtime(true)), 16),
+    'io.opentelemetry.example',
+    API\SpanKind::KIND_PRODUCER
+);
 
+$exporter = new JaegerExporter(
+    'alwaysOnJaegerExample',
+    'http://jaeger:9411/api/v2/spans'
+);
 
-//init server span start
-$config = Config::getInstance();
-$config->gen128bit();
+if (SamplingResult::RECORD_AND_SAMPLED === $samplingResult->getDecision()) {
+    echo 'Starting AlwaysOnJaegerExample';
+    $tracer = (new TracerProvider())
+        ->addSpanProcessor(new BatchSpanProcessor($exporter, Clock::get()))
+        ->getTracer('io.opentelemetry.contrib.php');
 
-$config::$propagator = Jaeger\Constants\PROPAGATOR_ZIPKIN;
+    for ($i = 0; $i < 5; $i++) {
+        // start a span, register some events
+        $timestamp = Clock::get()->timestamp();
 
-$tracer = $config->initTracer('phpService', 'jaeger:6831');
+        $span = $tracer->startAndActivateSpan('session.generate.span' . microtime(true));
 
-$injectTarget = [];
-$spanContext = $tracer->extract(Formats\TEXT_MAP, $_SERVER, 'HTTP_X_TRACEID');
-$serverSpan = $tracer->startSpan('example HTTP');
-$serverSpan->addBaggageItem("version", "1.8.9");
-var_dump($serverSpan->getContext());
-$tracer->inject($serverSpan->getContext(), Formats\TEXT_MAP, $_SERVER);
+        $spanParent = $span->getParent();
+        echo sprintf(
+            PHP_EOL . 'Exporting Trace: %s, Parent: %s, Span: %s',
+            $span->getContext()->getTraceId(),
+            $spanParent ? $spanParent->getSpanId() : 'None',
+            $span->getContext()->getSpanId()
+        );
 
-//init server span end
-$clientTracer = $config->initTracer('HTTP');
+        $span->setAttribute('remote_ip', '1.2.3.4')
+            ->setAttribute('country', 'USA');
 
-//client span1 start
-$injectTarget1 = [];
-$spanContext = $clientTracer->extract(Formats\TEXT_MAP, $_SERVER);
-$clientSpan1 = $clientTracer->startSpan('HTTP1', ['child_of' => $spanContext]);
-$clientTracer->inject($clientSpan1->spanContext, Formats\TEXT_MAP, $injectTarget1);
-var_dump($injectTarget1);
+        $span->addEvent('found_login' . $i, $timestamp, new Attributes([
+            'id' => $i,
+            'username' => 'otuser' . $i,
+        ]));
+        $span->addEvent('generated_session', $timestamp, new Attributes([
+            'id' => md5((string) microtime(true)),
+        ]));
 
-$method = 'GET';
-$url = 'https://github.com/';
-$client = new Client();
-$res = $client->request($method, $url,['headers' => $injectTarget1]);
-$clientSpan1->setTag('http.status_code', 200);
-$clientSpan1->setTag('http.method', 'GET');
-$clientSpan1->setTag('http.url', $url);
+        $tracer->endActiveSpan();
+    }
+    echo PHP_EOL . 'AlwaysOnJaegerExample complete!  See the results at http://localhost:16686/';
+} else {
+    echo PHP_EOL . 'AlwaysOnJaegerExample tracing is not enabled';
+}
 
-$clientSpan1->log(['message' => "HTTP1 ". $method .' '. $url .' end !']);
-$clientSpan1->finish();
-//client span1 end
-
-//client span2 start
-$injectTarget2 = [];
-$spanContext = $clientTracer->extract(Formats\TEXT_MAP, $_SERVER);
-$clientSpan2 = $clientTracer->startSpan('HTTP2',
-    ['references' => [
-        Reference::create(Reference::FOLLOWS_FROM, $clientSpan1->spanContext),
-        Reference::create(Reference::CHILD_OF, $spanContext)
-    ]]);
-
-$clientTracer->inject($clientSpan2->spanContext, Formats\TEXT_MAP, $injectTarget2);
-
-var_dump($injectTarget2);
-
-$method = 'GET';
-$url = 'https://github.com/search?q=jaeger-php';
-$client = new Client();
-$res = $client->request($method, $url, ['headers' => $injectTarget2]);
-
-$clientSpan2->setTag('http.status_code', 200);
-$clientSpan2->setTag('http.method', 'GET');
-$clientSpan2->setTag('http.url', $url);
-
-$clientSpan2->log(['message' => "HTTP2 ". $method .' '. $url .' end !']);
-$clientSpan2->finish();
-//client span2 end
-
-//server span end
-$serverSpan->finish();
-//trace flush
-$config->flush();
-
-echo "success\r\n";
+echo PHP_EOL;
